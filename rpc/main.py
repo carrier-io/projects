@@ -5,6 +5,7 @@ import json
 from ..models.project import Project
 from ..models.quota import ProjectQuota
 from ..models.statistics import Statistic
+from ..models.statistics_test import StatisticTest
 
 from tools import rpc_tools
 from pylon.core.tools import web, log
@@ -109,3 +110,29 @@ class RPC:
                 ...
         return queues
 
+    @web.rpc('update_test_statistics', 'update_test_statistics')
+    @rpc_tools.wrap_exceptions(RuntimeError)
+    def update_test_statistics(self, report_data: dict, test_type: str):
+        cloud_settings = report_data['test_config']['env_vars']['cloud_settings']
+        is_project_resourses = False
+        if cloud_settings:
+            is_project_resourses = True
+            integration_name = cloud_settings['integration_name']
+            integration = self.context.rpc_manager.call.integrations_get_admin_defaults(integration_name)
+            if integration.id == cloud_settings['id'] and not cloud_settings['project_id']:
+                is_project_resourses = False
+
+        statistic_test = StatisticTest(
+            project_id = report_data['project_id'],
+            test_type = test_type,
+            test_uid = report_data['test_uid'],
+            report_uid = report_data['uid'],
+            start_time = report_data['start_time'],
+            end_time = report_data['end_time'],
+            duration = report_data['duration'],
+            cpu = report_data['test_config']['env_vars']['cpu_quota'],
+            memory = report_data['test_config']['env_vars']['memory_quota'],
+            runners = report_data['test_config']['parallel_runners'],
+            is_project_resourses = is_project_resourses
+        )
+        statistic_test.insert()
