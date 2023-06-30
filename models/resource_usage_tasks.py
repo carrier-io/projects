@@ -13,22 +13,27 @@
 #     limitations under the License.
 
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy.dialects.postgresql import JSON
 
 from tools import db, db_tools, rpc_tools
 
 
-class StatisticTest(db_tools.AbstractBaseMixin, db.Base, rpc_tools.RpcMixin):
-    __tablename__ = "statistic_test"
+class ResourceUsageTasks(db_tools.AbstractBaseMixin, db.Base, rpc_tools.RpcMixin):
+    __tablename__ = "resource_usage_tasks"
 
     id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, unique=False, nullable=False)
-    test_type = Column(String(128), unique=False, nullable=False)
-    test_uid = Column(String(128), unique=False, nullable=False)
-    report_uid = Column(String(128), unique=True, nullable=False)
+    project_id = Column(Integer, unique=False, nullable=True)
+    task_id = Column(String(128), unique=False, nullable=True)
+    task_result_id = Column(Integer, unique=False, nullable=False)
+    test_report_id = Column(Integer, unique=False, nullable=True)
+    duration = Column(Integer, unique=False, nullable=True, default=0)
     start_time = Column(DateTime, unique=False, nullable=True)
     end_time = Column(DateTime, unique=False, nullable=True)
-    duration = Column(Integer, unique=False, nullable=True)
     cpu = Column(Integer, unique=False, nullable=False)
     memory = Column(Integer, unique=False, nullable=False)
     runners = Column(Integer, unique=False, nullable=False, default=1)
+    is_cloud = Column(Boolean, unique=False, nullable=False, default=True)
+    location = Column(String(128), unique=False, nullable=False)
     is_project_resourses = Column(Boolean, unique=False, nullable=False, default=True)
+    resource_usage=Column(JSON, unique=False, default=[])
+
