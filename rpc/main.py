@@ -1,6 +1,7 @@
 from typing import Union
 import redis
 import json
+from datetime import datetime
 
 from ..models.project import Project
 from ..models.quota import ProjectQuota
@@ -110,63 +111,3 @@ class RPC:
             except ValueError:
                 ...
         return queues
-
-    @web.rpc('create_test_statistics', 'create_test_statistics')
-    @rpc_tools.wrap_exceptions(RuntimeError)
-    def create_test_statistics(self, report_data: dict, test_type: str):
-        cloud_settings = report_data['test_config']['env_vars']['cloud_settings']
-        is_project_resourses = False
-        if cloud_settings:
-            is_project_resourses = True
-            integration_name = cloud_settings['integration_name']
-            integration = self.context.rpc_manager.call.integrations_get_admin_defaults(integration_name)
-            if integration and integration.id == cloud_settings['id'] and not cloud_settings['project_id']:
-                is_project_resourses = False
-
-        statistic_test = ResourceUsage(
-            project_id = report_data['project_id'],
-            test_type = test_type,
-            test_uid = report_data['test_uid'],
-            report_uid = report_data['uid'],
-            report_id = report_data['id'],            
-            start_time = report_data['start_time'],
-            # end_time = report_data['end_time'],
-            # duration = 0,
-            cpu = report_data['test_config']['env_vars']['cpu_quota'],
-            memory = report_data['test_config']['env_vars']['memory_quota'],
-            runners = report_data['test_config']['parallel_runners'],
-            location = report_data['test_config']['location'],
-            is_cloud = bool(cloud_settings),
-            is_project_resourses = is_project_resourses
-        )
-        statistic_test.insert()
-
-    @web.rpc('create_task_statistics', 'create_task_statistics')
-    @rpc_tools.wrap_exceptions(RuntimeError)
-    def create_task_statistics(self, task_data: dict):
-        is_cloud = False  # must change it when we will be able to run tasks in clouds
-        is_project_resourses = False
-        statistic_task = ResourceUsageTasks(
-            project_id = task_data['project_id'],
-            task_id = task_data['id'],
-            task_result_id = task_data['task_result_id'],
-            test_report_id = task_data.get('test_report_id'),
-            start_time = task_data['start_time'],
-            cpu = json.loads(task_data['env_vars']).get('cpu_cores', 1),
-            memory = json.loads(task_data['env_vars']).get('memory', 4),
-            runners = json.loads(task_data['env_vars']).get('runners', 1),
-            is_cloud = is_cloud,
-            location = task_data['region'],
-            is_project_resourses = is_project_resourses
-        )
-        statistic_task.insert()
-
-    @web.rpc('update_task_statistics', 'update_task_statistics')
-    @rpc_tools.wrap_exceptions(RuntimeError)
-    def update_task_statistics(self, task_data: dict):
-        statistic_task = ResourceUsageTasks.query.filter(
-            ResourceUsageTasks.task_result_id == task_data['id']
-            ).first()
-        statistic_task.duration = round(task_data['task_duration'])
-        statistic_task.resource_usage = task_data['task_stats']
-        statistic_task.commit()

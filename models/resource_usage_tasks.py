@@ -24,6 +24,7 @@ class ResourceUsageTasks(db_tools.AbstractBaseMixin, db.Base, rpc_tools.RpcMixin
     id = Column(Integer, primary_key=True)
     project_id = Column(Integer, unique=False, nullable=True)
     task_id = Column(String(128), unique=False, nullable=True)
+    task_name = Column(String(128), unique=False, nullable=False)
     task_result_id = Column(Integer, unique=False, nullable=False)
     test_report_id = Column(Integer, unique=False, nullable=True)
     duration = Column(Integer, unique=False, nullable=True, default=0)
