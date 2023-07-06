@@ -14,21 +14,30 @@ from tools import constants
 class RPC:
     @web.rpc('get_test_statistics', 'get_test_statistics')
     @rpc_tools.wrap_exceptions(RuntimeError)
-    def get_test_statistics(self, project_id: Optional[int]=None):
+    def get_test_statistics(
+            self, project_id: int | None = None,
+            start_time: datetime | None = None,
+            end_time: datetime | None = None
+            ):
         statisticts = []
         if project_id:
-            query_results = ResourceUsage.query.filter(
+            query = ResourceUsage.query.filter(
                 ResourceUsage.project_id == project_id
-                ).all()
+                )
         else:
-            query_results = ResourceUsage.query.all()
+            query = ResourceUsage.query
+        if start_time:
+            query = query.filter(ResourceUsage.start_time >= start_time.isoformat())
+        if end_time:
+            query = query.filter(ResourceUsage.start_time <= end_time.isoformat())
+        query_results = query.all()
         for result in query_results:
             statisticts.append(
                 {
                     'id': result.id,
                     'project_id': result.project_id,
                     'test_type': result.test_type,
-                    'end_time': str(result.end_time),
+                    'start_time': str(result.start_time),
                     'cpu_usage': result.cpu * result.duration,
                     'memory_usage': result.memory * result.duration,
                     'is_project_resourses': result.is_project_resourses
@@ -78,14 +87,23 @@ class RPC:
 
     @web.rpc('get_task_statistics', 'get_task_statistics')
     @rpc_tools.wrap_exceptions(RuntimeError)
-    def get_task_statistics(self, project_id: Optional[int]=None):
+    def get_task_statistics(            
+            self, project_id: int | None = None,
+            start_time: datetime | None = None,
+            end_time: datetime | None = None
+            ):
         statisticts = []
         if project_id:
-            query_results = ResourceUsageTasks.query.filter(
+            query = ResourceUsageTasks.query.filter(
                 ResourceUsageTasks.project_id == project_id
-                ).all()
+                )
         else:
-            query_results = ResourceUsageTasks.query.all()
+            query = ResourceUsageTasks.query
+        if start_time:
+            query = query.filter(ResourceUsageTasks.start_time >= start_time.isoformat())
+        if end_time:
+            query = query.filter(ResourceUsageTasks.start_time <= end_time.isoformat())
+        query_results = query.all()
         for result in query_results:
             statisticts.append(
                 {
