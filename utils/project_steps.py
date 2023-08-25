@@ -221,26 +221,26 @@ class RabbitVhost(ProjectCreationStep):
         )
 
 
-class InfluxDatabases(ProjectCreationStep):
-    name = 'influx_databases'
-
-    def create(self, vault_client: VaultClient) -> None:
-        # vault_client = VaultClient.from_project(project_id)
-        secrets = vault_client.get_all_secrets()
-        client = get_client(vault_client.project_id, secrets=secrets)
-        for i in INFLUX_DATABASES.keys():
-            db_name = secrets.get(i)
-            client.query(
-                f"create database {db_name} with duration 180d replication 1 shard duration 7d name autogen"
-            )
-
-    def delete(self, vault_client: VaultClient, **kwargs) -> None:
-        # vault_client = VaultClient.from_project(project_id)
-        secrets = vault_client.get_all_secrets()
-        client = get_client(vault_client.project_id, secrets=secrets)
-        for i in INFLUX_DATABASES.keys():
-            db_name = secrets.get(i)
-            client.query(f"drop database {db_name}")
+# class InfluxDatabases(ProjectCreationStep):
+#     name = 'influx_databases'
+#
+#     def create(self, vault_client: VaultClient) -> None:
+#         # vault_client = VaultClient.from_project(project_id)
+#         secrets = vault_client.get_all_secrets()
+#         client = get_client(vault_client.project_id, secrets=secrets)
+#         for i in INFLUX_DATABASES.keys():
+#             db_name = secrets.get(i)
+#             client.query(
+#                 f"create database {db_name} with duration 180d replication 1 shard duration 7d name autogen"
+#             )
+#
+#     def delete(self, vault_client: VaultClient, **kwargs) -> None:
+#         # vault_client = VaultClient.from_project(project_id)
+#         secrets = vault_client.get_all_secrets()
+#         client = get_client(vault_client.project_id, secrets=secrets)
+#         for i in INFLUX_DATABASES.keys():
+#             db_name = secrets.get(i)
+#             client.query(f"drop database {db_name}")
 
 
 class Invitations(ProjectCreationStep):
@@ -276,7 +276,7 @@ def get_steps(module=None):
         SystemToken,
         ProjectSecrets,
         RabbitVhost,
-        InfluxDatabases,
+        # InfluxDatabases,
         Invitations
     ]:
         yield step(module)

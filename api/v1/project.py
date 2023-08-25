@@ -95,7 +95,7 @@ class AdminAPI(api_tools.APIModeHandler):
 
             # Init project databases
             RabbitVhost().create(vault_client)
-            InfluxDatabases().create(vault_client)
+            # InfluxDatabases().create(vault_client)
 
             # self.module.context.rpc_manager.timeout(3).check_rabbit_queues()
             # log.info('after run rabbit task')
