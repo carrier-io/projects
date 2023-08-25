@@ -15,7 +15,7 @@ from ...models.project import Project
 from ...utils import get_project_user
 from ...utils.project_steps import ProjectModel, ProjectSchema, SystemUser, SystemToken, \
     ProjectSecrets, \
-    InfluxDatabases, RabbitVhost, get_steps, ProjectPermissions, Invitations
+    RabbitVhost, get_steps, ProjectPermissions, Invitations
 
 
 class ProjectAPI(api_tools.APIModeHandler):
