@@ -33,26 +33,6 @@ class ProjectAPI(api_tools.APIModeHandler):
         limit_ = request.args.get("limit")
         search_ = request.args.get("search")
         #
-        return self.module.list_user_projects(
-            user_id, offset_=offset_, limit_=limit_, search_=search_
-        ), 200
-
-
-class AdminAPI(api_tools.APIModeHandler):
-    @auth.decorators.check_api({
-        "permissions": ["projects.projects.project.view"],
-        "recommended_roles": {
-            "administration": {"admin": True, "viewer": True, "editor": True},
-        }})
-    def get(self, **kwargs) -> tuple[dict, int] | tuple[list, int]:
-        user_id = auth.current_user().get("id")
-        if not user_id:
-            return list(), 200
-        #
-        offset_ = request.args.get("offset")
-        limit_ = request.args.get("limit")
-        search_ = request.args.get("search")
-        #
         check_public_role = request.args.get("check_public_role")
         projects = self.module.list_user_projects(
             user_id, offset_=offset_, limit_=limit_, search_=search_
@@ -80,6 +60,26 @@ class AdminAPI(api_tools.APIModeHandler):
             except Empty as e:
                 log.error(e)
         return projects, 200
+
+
+class AdminAPI(api_tools.APIModeHandler):
+    @auth.decorators.check_api({
+        "permissions": ["projects.projects.project.view"],
+        "recommended_roles": {
+            "administration": {"admin": True, "viewer": True, "editor": True},
+        }})
+    def get(self, **kwargs) -> tuple[dict, int] | tuple[list, int]:
+        user_id = auth.current_user().get("id")
+        if not user_id:
+            return list(), 200
+        #
+        offset_ = request.args.get("offset")
+        limit_ = request.args.get("limit")
+        search_ = request.args.get("search")
+        #
+        return self.module.list_user_projects(
+            user_id, offset_=offset_, limit_=limit_, search_=search_
+        ), 200
 
     @auth.decorators.check_api({
         "permissions": ["projects.projects.project.create"],
