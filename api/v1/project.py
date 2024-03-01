@@ -63,11 +63,11 @@ class AdminAPI(api_tools.APIModeHandler):
             secrets = vault_client.get_all_secrets()
             try:
                 public_project = int(secrets['ai_project_id'])
-                public_admin = int(secrets['ai_public_admin'])
+                public_admin = secrets['ai_public_admin']
                 filtered_ids = list()
                 for project in projects:
                     if project['id'] == public_project:
-                        roles = [role['id'] for role in self.module.context.rpc_manager.timeout(
+                        roles = [role['name'] for role in self.module.context.rpc_manager.timeout(
                             2
                         ).admin_get_user_roles(
                             public_project, user_id
