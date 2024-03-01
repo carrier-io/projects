@@ -31,9 +31,10 @@ class ProjectAPI(api_tools.APIModeHandler):
         offset_ = request.args.get("offset")
         limit_ = request.args.get("limit")
         search_ = request.args.get("search")
-        #
+        check_public_role = request.args.get("check_public_role")
         return self.module.list_user_projects(
-            user_id, offset_=offset_, limit_=limit_, search_=search_
+            user_id, offset_=offset_, limit_=limit_, search_=search_,
+            check_public_role=check_public_role
         ), 200
 
 
@@ -52,8 +53,10 @@ class AdminAPI(api_tools.APIModeHandler):
         limit_ = request.args.get("limit")
         search_ = request.args.get("search")
         #
+        check_public_role = request.args.get("check_public_role")
         return self.module.list_user_projects(
-            user_id, offset_=offset_, limit_=limit_, search_=search_
+            user_id, offset_=offset_, limit_=limit_, search_=search_,
+            check_public_role=check_public_role
         ), 200
 
     @auth.decorators.check_api({

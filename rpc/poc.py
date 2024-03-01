@@ -1,5 +1,6 @@
 from collections import defaultdict
 import re
+from queue import Empty
 from traceback import format_exc
 from typing import Optional
 
@@ -53,17 +54,34 @@ def create_keycloak_user(user_email: str, *, rpc_manager, default_password: str 
     log.info('after keycloak')
 
 
-
 class RPC:
     @web.rpc("list_user_projects", "list_user_projects")
     @rpc_tools.wrap_exceptions(RuntimeError)
     def list_user_projects(self, user_id: int, **kwargs) -> list:
         all_projects = self.list(**kwargs)
         # log.info(f"projects {user_id=} {all_projects=}")
+        check_public_role = kwargs.get('check_public_role')
+        # FIXME role from the secret
+        public_role = 'PUBLIC_ROLE'
         user_projects = list()
+
         for project in all_projects:
-            if self.context.rpc_manager.call.admin_check_user_in_project(project["id"], user_id):
-                user_projects.append(project)
+            if self.context.rpc_manager.call.admin_check_user_in_project(
+                project["id"], user_id
+            ):
+                if check_public_role:
+                    try:
+                        roles = [role['name'] for role in self.context.rpc_manager.timeout(
+                            2
+                        ).get_roles(
+                            project["id"]
+                        )]
+                        if public_role in roles:
+                            user_projects.append(project)
+                    except Empty as e:
+                        log.error(e)
+                else:
+                    user_projects.append(project)
         return user_projects
 
     @web.rpc("add_user_to_project_or_create", "add_user_to_project_or_create")
